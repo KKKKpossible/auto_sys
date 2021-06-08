@@ -21,13 +21,18 @@ namespace auto_sys_0
         private byte[] rst_cmd = new byte[100];
         private byte[] unit_cmd = new byte[100];
 
-        private int g_buff_index = 0;
-        List<byte> g_list = new List<byte>();
-
         private int pop_count     = 0;
         private int pop_count_max = 0;
 
         private double forward_buffer = 0.0;
+
+        private object lockObject = new object();
+
+        private byte[] parser = new byte[17];
+        private int parse_index = 0;
+
+        private bool disconnect_serial_call;
+        private int disconnect_count;
 
         public Form1()
         {
@@ -50,15 +55,49 @@ namespace auto_sys_0
         {
             try
             {
-                byte[] buffer_input = new byte[100];
-                if (serialPort1.BytesToRead > 100) return;
-                if (g_buff_index >= 100) return;
+                lock(lockObject)
+                {
+                    if(disconnect_serial_call == true)
+                    {
+                        disconnect_count = 0;
+                    }
+                    byte[] buffer_input = new byte[1024];
 
-                serialPort1.Read(buffer_input, 0, serialPort1.BytesToRead);
+                    int length = serialPort1.BytesToRead;
 
-                g_buff_index += serialPort1.BytesToRead;
-                
-                demoReceiveTextBox.Text += Encoding.ASCII.GetString(buffer_input);
+                    if (length > 1024)
+                    {
+                        CatchErrorMeasureReset();
+                        MessageBox.Show("Buffer Max Error");
+                        return;
+                    }
+
+                    serialPort1.Read(buffer_input, 0, length);
+
+                    if(timer1.Enabled)
+                    {
+                        for(int i = 0; i < length; i++)
+                        {
+                            parser[parse_index++] = buffer_input[i];
+
+                            if(parser[parse_index - 1] == '\n' && parse_index == 17)
+                            {
+                                parse_index = 0;
+                                demoReceiveTextBox.Text += Encoding.ASCII.GetString(parser);
+                            }
+                            if(parse_index == 17)
+                            {
+                                MessageBox.Show("Parse Error");
+                                CatchErrorMeasureReset();
+                            }
+                        }
+                    }
+                    else
+                    {
+                        demoReceiveTextBox.Text += Encoding.ASCII.GetString(buffer_input);
+
+                    }
+                }
             }
             catch(Exception ex)
             {
@@ -96,15 +135,12 @@ namespace auto_sys_0
                     serialPort1.PortName = comboBox1.Text;
                     serialPort1.Open();
                     WriteSerial("*idn?\n");
-
+                    disconnect_serial_call = false;
                     ConnectButton.BackColor = Color.Red;
                 }
                 else
                 {
                     CatchErrorMeasureReset();
-
-                    serialPort1.Close();
-                    ConnectButton.BackColor = DefaultBackColor;
                 }
             }
             catch (Exception ex)
@@ -139,7 +175,7 @@ namespace auto_sys_0
                 }
                 else
                 {
-                    CatchErrorMeasureReset();
+                    MeasureReset();
                 }
             }
             catch(Exception ex)
@@ -311,6 +347,8 @@ namespace auto_sys_0
             {
                 try
                 {
+                    string buff_demoReceiveTextBox = string.Copy(demoReceiveTextBox.Text);
+                    demoReceiveTextBox.Text = "";
                     pop_count++;
 
                     if (pop_count > pop_count_max)
@@ -324,9 +362,35 @@ namespace auto_sys_0
                     }
                     else
                     {
-                        if (demoReceiveTextBox.Text != "")
+                        string[] setting = buff_demoReceiveTextBox.Split('\n');
+                        
+                        if(setting.Length > 0)
                         {
-                            forward_buffer += Convert.ToDouble(string.Format("{0:0.00}", double.Parse(demoReceiveTextBox.Text)));
+                            for(int i = 0; i < setting.Length;)
+                            {
+                                if(setting[i] != "")
+                                {
+                                    forward_buffer += Convert.ToDouble(string.Format("{0:0.00}", Convert.ToDouble(setting[i])));
+                                    i++;
+                                    if (i != setting.Length - 1)
+                                    {
+                                        pop_count++;
+                                    }
+                                    if (pop_count > pop_count_max)
+                                    {
+                                        pop_count = 0;
+
+                                        ForwardTBox.Text = string.Format("{0:0.00}", forward_buffer / Convert.ToDouble(pop_count_max));
+                                        Clipboard.SetText(ForwardTBox.Text);
+
+                                        forward_buffer = 0;
+                                    }
+                                }
+                                else
+                                {
+                                    i++;
+                                }
+                            }
                         }
                     }
                 }
@@ -336,34 +400,80 @@ namespace auto_sys_0
                     MessageBox.Show(ex.ToString());
                 }
             }
-            demoReceiveTextBox.Text = "";
             WriteSerial(MeaCmdTBox.Text + "\n");
+        }
+
+        private void MeasureReset()
+        {
+            timer1.Stop();
+
+            ForwardTBox.Text = "";
+
+            UnitButton.Enabled = true;
+            ResetButton.Enabled = true;
+            MeaCmdTBox.Enabled = true;
+            IntervalTBox.Enabled = true;
+            PopCountTbox.Enabled = true;
+            demoReceiveTextBox.Enabled = true;
+
+            mea_push = false;
+            MeaButton.BackColor = DefaultBackColor;
+
+            pop_count = 0;
+            forward_buffer = 0;
         }
 
         private void CatchErrorMeasureReset()
         {
             try
             {
-                timer1.Stop();
+                if(ConnectButton.Enabled == true)
+                {
+                    ConnectButton.Enabled = false;
 
-                ForwardTBox.Text = "";
+                    timer1.Stop();
 
-                UnitButton.Enabled = true;
-                ResetButton.Enabled = true;
-                MeaCmdTBox.Enabled = true;
-                IntervalTBox.Enabled = true;
-                PopCountTbox.Enabled = true;
-                demoReceiveTextBox.Enabled = true;
+                    ForwardTBox.Text = "";
 
-                mea_push = false;
-                MeaButton.BackColor = DefaultBackColor;
+                    UnitButton.Enabled = true;
+                    ResetButton.Enabled = true;
+                    MeaCmdTBox.Enabled = true;
+                    IntervalTBox.Enabled = true;
+                    PopCountTbox.Enabled = true;
+                    demoReceiveTextBox.Enabled = true;
 
-                pop_count = 0;
-                forward_buffer = 0;
+                    mea_push = false;
+                    MeaButton.BackColor = DefaultBackColor;
+
+                    pop_count = 0;
+                    forward_buffer = 0;
+
+                    disconnect_serial_call = true;
+                    timer2.Interval = 3333;
+                    timer2.Start();
+                    MessageBox.Show("Please wait 10sec");
+                }
             }
             catch(Exception ex)
             {
                 MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private void timer2_Tick(object sender, EventArgs e)
+        {
+            if(disconnect_serial_call == true)
+            {
+                disconnect_count++;
+                if(disconnect_count == 3)
+                {
+                    disconnect_count = 0;
+                    serialPort1.Close();
+                    ConnectButton.BackColor = DefaultBackColor;
+                    timer2.Stop();
+                    timer2.Interval = 100;
+                    ConnectButton.Enabled = true;
+                }
             }
         }
     }

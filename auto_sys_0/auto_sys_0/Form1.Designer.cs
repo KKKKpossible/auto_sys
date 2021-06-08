@@ -74,6 +74,7 @@ namespace auto_sys_0
             this.label13 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.timer2 = new System.Windows.Forms.Timer(this.components);
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -501,6 +502,10 @@ namespace auto_sys_0
             // 
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // timer2
+            // 
+            this.timer2.Tick += new System.EventHandler(this.timer2_Tick);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
@@ -575,6 +580,7 @@ namespace auto_sys_0
         private System.Windows.Forms.TextBox IntervalTBox;
         private System.Windows.Forms.Label label17;
         private System.Windows.Forms.TextBox PopCountTbox;
+        private System.Windows.Forms.Timer timer2;
     }
 }
 
