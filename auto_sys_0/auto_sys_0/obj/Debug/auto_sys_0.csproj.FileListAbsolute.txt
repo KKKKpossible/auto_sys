@@ -1,10 +1,10 @@
 D:\_16_c_sharp\auto_sys\auto_sys_0\auto_sys_0\bin\Debug\auto_sys_0.exe.config
 D:\_16_c_sharp\auto_sys\auto_sys_0\auto_sys_0\bin\Debug\auto_sys_0.exe
 D:\_16_c_sharp\auto_sys\auto_sys_0\auto_sys_0\bin\Debug\auto_sys_0.pdb
-D:\_16_c_sharp\auto_sys\auto_sys_0\auto_sys_0\obj\Debug\auto_sys_0.csprojAssemblyReference.cache
 D:\_16_c_sharp\auto_sys\auto_sys_0\auto_sys_0\obj\Debug\auto_sys_0.Properties.Resources.resources
 D:\_16_c_sharp\auto_sys\auto_sys_0\auto_sys_0\obj\Debug\auto_sys_0.csproj.GenerateResource.cache
 D:\_16_c_sharp\auto_sys\auto_sys_0\auto_sys_0\obj\Debug\auto_sys_0.csproj.CoreCompileInputs.cache
 D:\_16_c_sharp\auto_sys\auto_sys_0\auto_sys_0\obj\Debug\auto_sys_0.exe
 D:\_16_c_sharp\auto_sys\auto_sys_0\auto_sys_0\obj\Debug\auto_sys_0.pdb
 D:\_16_c_sharp\auto_sys\auto_sys_0\auto_sys_0\obj\Debug\auto_sys_0.Form1.resources
+D:\_16_c_sharp\auto_sys\auto_sys_0\auto_sys_0\obj\Debug\auto_sys_0.csproj.AssemblyReference.cache

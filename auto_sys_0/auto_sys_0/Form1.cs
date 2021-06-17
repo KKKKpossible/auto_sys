@@ -34,6 +34,8 @@ namespace auto_sys_0
         private bool disconnect_serial_call;
         private int disconnect_count;
 
+        private bool copy_automode;
+
         public Form1()
         {
             InitializeComponent();
@@ -131,16 +133,28 @@ namespace auto_sys_0
             {
                 if (serialPort1.IsOpen == false)
                 {
-                    serialPort1.BaudRate = Convert.ToInt32(BaudText.Text);
+                    if(Radio_baud_19200.Checked == true)
+                    {
+                        serialPort1.BaudRate = 19200;
+                    }
+                    else if(Radio_baud_115200.Checked == true)
+                    {
+                        serialPort1.BaudRate = 115200;
+                    }
+                    // serialPort1.BaudRate = Convert.ToInt32(BaudText.Text);
                     serialPort1.PortName = comboBox1.Text;
                     serialPort1.Open();
                     WriteSerial("*idn?\n");
                     disconnect_serial_call = false;
                     ConnectButton.BackColor = Color.Red;
+
+                    MeaButton.Enabled = true;
                 }
                 else
                 {
                     CatchErrorMeasureReset();
+                    ConnectButton.BackColor = DefaultBackColor;
+                    ConnectButton.Enabled = true;
                 }
             }
             catch (Exception ex)
@@ -149,7 +163,8 @@ namespace auto_sys_0
                 MessageBox.Show(ex.ToString());
             }
         }
-        private void MeaButton_Click(object sender, EventArgs e)
+
+        private void MeasureButtonClickProcedure()
         {
             try
             {
@@ -178,6 +193,18 @@ namespace auto_sys_0
                     MeasureReset();
                 }
             }
+            catch (Exception ex)
+            {
+                CatchErrorMeasureReset();
+                MessageBox.Show(ex.ToString());
+            }
+        }
+        private void MeaButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                MeasureButtonClickProcedure();
+            }
             catch(Exception ex)
             {
                 CatchErrorMeasureReset();
@@ -200,7 +227,16 @@ namespace auto_sys_0
         {
             try
             {
-                Clipboard.SetText(ForwardTBox.Text);
+                if(copy_automode == false)
+                {
+                    copy_automode = true;
+                    CopyButton.BackColor = Color.Red;
+                }
+                else
+                {
+                    copy_automode = false;
+                    CopyButton.BackColor = DefaultBackColor;
+                }
             }
             catch(Exception ex)
             {
@@ -249,28 +285,59 @@ namespace auto_sys_0
         {
             try
             {
-                string   str     = File.ReadAllText(@"cmd.txt").Replace("\n", ",");
-                string[] setting = str.Split(',');
-                
+                string   str       = File.ReadAllText(@"cmd.txt").Replace("\n", ",");
+
+                string   baud_buff = "";
+                string[] setting   = str.Split(',');
+
                 MeaCmdTBox.Text      = setting[0];
                 RstCmdTBox.Text      = setting[1];
                 UnitdBmCmdTbox.Text  = setting[2];
                 UnitWCmdTbox.Text    = setting[3];
                 Custom_0CmdTbox.Text = setting[4];
                 Custom_1CmdTbox.Text = setting[5];
-                BaudText.Text        = setting[6];
+                baud_buff            = setting[6];
+
+                if(baud_buff == "19200")
+                {
+                    Radio_baud_19200.Checked = true;
+                    Radio_baud_115200.Checked = false;
+                }
+                else if(baud_buff == "115200")
+                {
+                    Radio_baud_19200.Checked = false;
+                    Radio_baud_115200.Checked = true;
+                }
+                else
+                {
+                    Radio_baud_19200.Checked = true;
+                    Radio_baud_115200.Checked = false;
+                }
+
                 IntervalTBox.Text    = setting[7];
                 PopCountTbox.Text    = setting[8];
             }
             catch
             {
-                MessageBox.Show("cmd.txt file error");
+                MessageBox.Show("cmd.txt file is not exist");
+                Radio_baud_19200.Checked = true;
             }
         }
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
             try
             {
+                string baud_buff = "";
+
+                if(Radio_baud_19200.Checked == true)
+                {
+                    baud_buff = "19200";
+                }
+                else if(Radio_baud_115200.Checked == true)
+                {
+                    baud_buff = "115200";
+                }
+
                 string str =
                 MeaCmdTBox.Text        + "\n"
                 + RstCmdTBox.Text      + "\n"
@@ -278,7 +345,7 @@ namespace auto_sys_0
                 + UnitWCmdTbox.Text    + "\n"
                 + Custom_0CmdTbox.Text + "\n"
                 + Custom_1CmdTbox.Text + "\n"
-                + BaudText.Text        + "\n"
+                + baud_buff            + "\n"
                 + IntervalTBox.Text    + "\n"
                 + PopCountTbox.Text    + "\n";
 
@@ -356,23 +423,30 @@ namespace auto_sys_0
                         pop_count = 0;
 
                         ForwardTBox.Text = string.Format("{0:0.00}", forward_buffer / Convert.ToDouble(pop_count_max));
-                        Clipboard.SetText(ForwardTBox.Text);
-                        
+                        if(ForwardTBox.Text != "")
+                        {
+                            if(copy_automode == true)
+                            {
+                                Clipboard.SetText(ForwardTBox.Text);
+                            }
+                        }
                         forward_buffer = 0;
                     }
                     else
                     {
-                        string[] setting = buff_demoReceiveTextBox.Split('\n');
+                        string[] split_bufdemo = buff_demoReceiveTextBox.Split('\n');
                         
-                        if(setting.Length > 0)
+                        if(split_bufdemo.Length > 0)
                         {
-                            for(int i = 0; i < setting.Length;)
+                            for(int i = 0; i < split_bufdemo.Length;)
                             {
-                                if(setting[i] != "")
+                                if(split_bufdemo[i] != "")
                                 {
-                                    forward_buffer += Convert.ToDouble(string.Format("{0:0.00}", Convert.ToDouble(setting[i])));
+                                    forward_buffer += Convert.ToDouble(string.Format("{0:0.00}", Convert.ToDouble(split_bufdemo[i])));
                                     i++;
-                                    if (i != setting.Length - 1)
+
+                                    // \n으로 split하여 마지막 string 배열은 empty값이 들어있음. 그래서 split_bufdemo.Length -1을 비교함.
+                                    if (i != split_bufdemo.Length - 1) 
                                     {
                                         pop_count++;
                                     }
@@ -381,8 +455,13 @@ namespace auto_sys_0
                                         pop_count = 0;
 
                                         ForwardTBox.Text = string.Format("{0:0.00}", forward_buffer / Convert.ToDouble(pop_count_max));
-                                        Clipboard.SetText(ForwardTBox.Text);
-
+                                        if (ForwardTBox.Text != "")
+                                        {
+                                            if (copy_automode == true)
+                                            {
+                                                Clipboard.SetText(ForwardTBox.Text);
+                                            }
+                                        }
                                         forward_buffer = 0;
                                     }
                                 }
@@ -427,10 +506,17 @@ namespace auto_sys_0
         {
             try
             {
-                if(ConnectButton.Enabled == true)
+                MeaButton.Enabled = false;
+
+                if (ConnectButton.Enabled == true)
                 {
                     ConnectButton.Enabled = false;
 
+                    if (timer1.Enabled == true)
+                    {
+                        timer2.Interval = 1000;
+                        MessageBox.Show("Please wait 5sec");
+                    }
                     timer1.Stop();
 
                     ForwardTBox.Text = "";
@@ -449,9 +535,8 @@ namespace auto_sys_0
                     forward_buffer = 0;
 
                     disconnect_serial_call = true;
-                    timer2.Interval = 3333;
                     timer2.Start();
-                    MessageBox.Show("Please wait 10sec");
+                    ConnectButton.BackColor = Color.Yellow;
                 }
             }
             catch(Exception ex)
@@ -465,7 +550,7 @@ namespace auto_sys_0
             if(disconnect_serial_call == true)
             {
                 disconnect_count++;
-                if(disconnect_count == 3)
+                if(disconnect_count == 5)
                 {
                     disconnect_count = 0;
                     serialPort1.Close();

@@ -44,8 +44,9 @@ namespace auto_sys_0
             this.label1 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.Radio_baud_115200 = new System.Windows.Forms.RadioButton();
+            this.Radio_baud_19200 = new System.Windows.Forms.RadioButton();
             this.label5 = new System.Windows.Forms.Label();
-            this.BaudText = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
             this.panel3 = new System.Windows.Forms.Panel();
@@ -139,6 +140,7 @@ namespace auto_sys_0
             // 
             // MeaButton
             // 
+            this.MeaButton.Enabled = false;
             this.MeaButton.Location = new System.Drawing.Point(28, 134);
             this.MeaButton.Name = "MeaButton";
             this.MeaButton.Size = new System.Drawing.Size(122, 68);
@@ -205,8 +207,9 @@ namespace auto_sys_0
             // panel1
             // 
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel1.Controls.Add(this.Radio_baud_115200);
+            this.panel1.Controls.Add(this.Radio_baud_19200);
             this.panel1.Controls.Add(this.label5);
-            this.panel1.Controls.Add(this.BaudText);
             this.panel1.Controls.Add(this.label4);
             this.panel1.Controls.Add(this.comboBox1);
             this.panel1.Controls.Add(this.ConnectButton);
@@ -214,6 +217,28 @@ namespace auto_sys_0
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(333, 233);
             this.panel1.TabIndex = 15;
+            // 
+            // Radio_baud_115200
+            // 
+            this.Radio_baud_115200.AutoSize = true;
+            this.Radio_baud_115200.Location = new System.Drawing.Point(229, 35);
+            this.Radio_baud_115200.Name = "Radio_baud_115200";
+            this.Radio_baud_115200.Size = new System.Drawing.Size(76, 19);
+            this.Radio_baud_115200.TabIndex = 19;
+            this.Radio_baud_115200.TabStop = true;
+            this.Radio_baud_115200.Text = "115200";
+            this.Radio_baud_115200.UseVisualStyleBackColor = true;
+            // 
+            // Radio_baud_19200
+            // 
+            this.Radio_baud_19200.AutoSize = true;
+            this.Radio_baud_19200.Location = new System.Drawing.Point(126, 35);
+            this.Radio_baud_19200.Name = "Radio_baud_19200";
+            this.Radio_baud_19200.Size = new System.Drawing.Size(68, 19);
+            this.Radio_baud_19200.TabIndex = 18;
+            this.Radio_baud_19200.TabStop = true;
+            this.Radio_baud_19200.Text = "19200";
+            this.Radio_baud_19200.UseVisualStyleBackColor = true;
             // 
             // label5
             // 
@@ -224,14 +249,6 @@ namespace auto_sys_0
             this.label5.Size = new System.Drawing.Size(85, 15);
             this.label5.TabIndex = 17;
             this.label5.Text = "Baud Rate";
-            // 
-            // BaudText
-            // 
-            this.BaudText.Location = new System.Drawing.Point(126, 39);
-            this.BaudText.Name = "BaudText";
-            this.BaudText.Size = new System.Drawing.Size(179, 25);
-            this.BaudText.TabIndex = 16;
-            this.BaudText.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // label4
             // 
@@ -274,6 +291,7 @@ namespace auto_sys_0
             // 
             // panel4
             // 
+            this.panel4.AutoScroll = true;
             this.panel4.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel4.Controls.Add(this.label17);
             this.panel4.Controls.Add(this.PopCountTbox);
@@ -315,6 +333,7 @@ namespace auto_sys_0
             this.PopCountTbox.Name = "PopCountTbox";
             this.PopCountTbox.Size = new System.Drawing.Size(201, 25);
             this.PopCountTbox.TabIndex = 29;
+            this.PopCountTbox.Text = "1";
             // 
             // label16
             // 
@@ -331,6 +350,7 @@ namespace auto_sys_0
             this.IntervalTBox.Name = "IntervalTBox";
             this.IntervalTBox.Size = new System.Drawing.Size(201, 25);
             this.IntervalTBox.TabIndex = 27;
+            this.IntervalTBox.Text = "1";
             // 
             // label15
             // 
@@ -348,6 +368,7 @@ namespace auto_sys_0
             this.MeaCmdTBox.Name = "MeaCmdTBox";
             this.MeaCmdTBox.Size = new System.Drawing.Size(201, 25);
             this.MeaCmdTBox.TabIndex = 14;
+            this.MeaCmdTBox.Text = "FETCH1?";
             // 
             // CusCmd_1
             // 
@@ -555,7 +576,6 @@ namespace auto_sys_0
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.TextBox BaudText;
         private System.Windows.Forms.TextBox MeaCmdTBox;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label7;
@@ -581,6 +601,8 @@ namespace auto_sys_0
         private System.Windows.Forms.Label label17;
         private System.Windows.Forms.TextBox PopCountTbox;
         private System.Windows.Forms.Timer timer2;
+        private System.Windows.Forms.RadioButton Radio_baud_115200;
+        private System.Windows.Forms.RadioButton Radio_baud_19200;
     }
 }
 
